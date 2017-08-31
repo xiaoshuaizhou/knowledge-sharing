@@ -6,6 +6,7 @@ use App\User;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Foundation\Auth\RegistersUsers;
+use Naux\Mail\SendCloudTemplate;
 
 class RegisterController extends Controller
 {
@@ -62,10 +63,37 @@ class RegisterController extends Controller
      */
     protected function create(array $data)
     {
-        return User::create([
+        $user = User::create([
             'name' => $data['name'],
             'email' => $data['email'],
+            'avatar' => '/images/avatar/default.jpg',
+            'is_active' => 0,
+            'confirmation_token' => str_random(40),
             'password' => bcrypt($data['password']),
         ]);
+
+        $this->sendRegisterEmail($user);
+
+        return $user;
+
+    }
+
+    /**
+     * @param $user
+     */
+    private function sendRegisterEmail($user)
+    {
+        $bind_data = [
+            'url' => route('email.verify', ['token' => $user->confirmation_token]),
+            'name' => $user->name
+        ];
+
+        $template = new SendCloudTemplate('zhihu_app_register', $bind_data);
+
+        \Mail::raw($template, function ($message) use ($user) {
+            $message->from('zhouxiaoshuai3@outlook.com', 'Knowledge-sharing');
+
+            $message->to($user->email);
+        });
     }
 }
