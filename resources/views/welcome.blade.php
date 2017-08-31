@@ -79,7 +79,7 @@
 
             <div class="content">
                 <div class="title m-b-md">
-                    knowledge-sharing!!!
+                    K~S
                 </div>
 
                 <div class="links">
